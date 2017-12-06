@@ -1,0 +1,19 @@
+[Unit]
+Description=Run %p
+Requires=docker.service postgres.service 
+After=docker.service postgres.service
+
+[Service]
+Restart=always
+User=advith
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm -f %p
+ExecStart=/usr/bin/docker run -t --rm --name %p \
+  --link postgres:postgres \
+  -v /home/advith/instance:/python-flask-nginx/instance \
+  -p 8000:8000 %p
+ExecStartPost=-/usr/bin/docker stop nginx
+ExecStop=/usr/bin/docker stop %p
+
+[Install]
+WantedBy=multi-user.target nginx.service
